@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-
+	// First
 	// Apa yang mau dibuat dinamis maka itu yang diinject
 	// Depency Injection
 	lhello := log.New(os.Stdout, "hello-api", log.LstdFlags)
