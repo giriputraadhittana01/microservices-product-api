@@ -11,21 +11,15 @@ import (
 )
 
 func main() {
-	// First
+	// Second
 	// Apa yang mau dibuat dinamis maka itu yang diinject
 	// Depency Injection
-	lhello := log.New(os.Stdout, "hello-api", log.LstdFlags)
-	lgoodbye := log.New(os.Stdout, "goodbye-api", log.LstdFlags)
-	helloHandler := handlers.NewHelloHandler(lhello)
-	goodbyeHandler := handlers.NewGoodByeHandler(lgoodbye)
-	// Tidak Depency Injection maka susah untuk diubah
-	hyHandler := handlers.GetAllDataHy
+	lproducts := log.New(os.Stdout, "products-api ", log.LstdFlags)
+	productsHandler := handlers.NewProductsHandler(lproducts)
 
 	server := http.NewServeMux()
 
-	server.HandleFunc("/hello", helloHandler.GetAllDataHello)
-	server.HandleFunc("/goodbye", goodbyeHandler.GetAllDataGoodBye)
-	server.HandleFunc("/hy", hyHandler)
+	server.Handle("/", productsHandler)
 
 	s := &http.Server{
 		Addr:         ":8000",
@@ -48,4 +42,5 @@ func main() {
 	log.Println("Receive Teriminate, Graceful Shutdown", sig)
 	tc, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	s.Shutdown(tc)
+
 }
