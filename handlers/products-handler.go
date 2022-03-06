@@ -41,8 +41,5 @@ func (p *Products) GetAllProduct(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(listOfProduct)
 }
 func (p *Products) AddProduct(rw http.ResponseWriter, r *http.Request) {
-	listOfProduct := data.GetProducts()
-	// _ = listOfProduct.ToJSON(rw)
-	json.NewEncoder(rw).Encode(listOfProduct)
 
 }
