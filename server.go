@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	// Second
+	// Third
 	// Apa yang mau dibuat dinamis maka itu yang diinject
 	// Depency Injection
 	lproducts := log.New(os.Stdout, "products-api ", log.LstdFlags)
