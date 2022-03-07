@@ -1,6 +1,8 @@
 package data
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestCheckValidation(t *testing.T) {
 	p := &Product{
@@ -9,8 +11,9 @@ func TestCheckValidation(t *testing.T) {
 		Price:       1.00,
 		SKU:         "abc-def-ghi",
 	}
-	err := p.Validate()
-	if err != nil {
+	vproducts := NewValidation()
+	err := vproducts.Validate(p)
+	if len(err) != 0 {
 		t.Fatal(err)
 	}
 }
