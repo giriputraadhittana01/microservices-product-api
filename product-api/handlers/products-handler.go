@@ -98,6 +98,7 @@ func (p *Products) AddProduct(rw http.ResponseWriter, r *http.Request) {
 // Update handles PUT requests to update products
 func (p Products) UpdateProducts(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
+
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {

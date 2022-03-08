@@ -8,6 +8,7 @@ import (
 
 func (p Products) MiddlewareValidateProduct(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.Header().Set("Content-Type", "application/x-www-form-urlencoded")
 		prod := &data.Product{}
 
 		err := data.FromJSON(prod, r.Body)

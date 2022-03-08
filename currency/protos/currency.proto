@@ -1,0 +1,82 @@
+syntax = "proto3";
+package protos;
+option go_package = ".;protos";
+
+service Currency {
+    // GetRate returns the exchange rate for the two provided currency codes 
+    rpc GetRate(RateRequest) returns (RateResponse);
+    rpc Calculate(CalculateRequest) returns (CalculateResponse);
+    rpc Greeting(GreetingRequest) returns (GreetingResponse);
+}
+
+// RateRequest defines the request for a GetRate call
+message RateRequest {
+    // Base is the base currency code for the rate
+    string Base = 1;
+    // Destination is the destination currency code for the rate
+    string Destination = 2;
+}
+
+// RateResponse is the response from a GetRate call, it contains
+// rate which is a floating point number and can be used to convert between the 
+// two currencies specified in the request.
+message RateResponse {
+    float rate = 1;
+}
+
+// RateRequest defines the request for a GetRate call
+message CalculateRequest {
+    // Base is the base currency code for the rate
+    int32 x = 1;
+    // Destination is the destination currency code for the rate
+    int32 y = 2;
+}
+// RateRequest defines the request for a GetRate call
+message CalculateResponse {
+    // Destination is the destination currency code for the rate
+    int32 Result = 1;
+}
+
+message GreetingRequest {
+    string Name = 1;
+}
+
+message GreetingResponse{
+    string Result = 1;
+}
+
+enum Currencies{
+  EUR=0;
+  USD=1;
+  JPY=2;
+  BGN=3;
+  CZK=4;
+  DKK=5;
+  GBP=6;
+  HUF=7;
+  PLN=8;
+  RON=9;
+  SEK=10;
+  CHF=11;
+  ISK=12;
+  NOK=13;
+  HRK=14;
+  RUB=15;
+  TRY=16;
+  AUD=17;
+  BRL=18;
+  CAD=19;
+  CNY=20;
+  HKD=21;
+  IDR=22;
+  ILS=23;
+  INR=24;
+  KRW=25;
+  MXN=26;
+  MYR=27;
+  NZD=28;
+  PHP=29;
+  SGD=30;
+  THB=31;
+  ZAR=32;
+}
