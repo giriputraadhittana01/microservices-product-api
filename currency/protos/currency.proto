@@ -7,6 +7,7 @@ service Currency {
     rpc GetRate(RateRequest) returns (RateResponse);
     rpc Calculate(CalculateRequest) returns (CalculateResponse);
     rpc Greeting(GreetingRequest) returns (GreetingResponse);
+    rpc SubscribeRates(stream RateRequest) returns (stream RateResponse);
 }
 
 // RateRequest defines the request for a GetRate call
