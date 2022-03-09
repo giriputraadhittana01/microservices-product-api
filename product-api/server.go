@@ -10,18 +10,31 @@ import (
 	"productapi/handlers"
 	"time"
 
+	protos "currentcyproject/protos/currency"
+
 	"github.com/go-openapi/runtime/middleware"
 	gohandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"google.golang.org/grpc"
 )
 
 func main() {
-	// Sixth
+	// Eight
 	// Apa yang mau dibuat dinamis maka itu yang diinject
 	// Depency Injection
 	lproducts := log.New(os.Stdout, "products-api ", log.LstdFlags)
 	vproducts := data.NewValidation()
-	productsHandler := handlers.NewProductsHandler(lproducts, vproducts)
+
+	// Create Client
+	conn, err := grpc.Dial("localhost:9000", grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+	cc := protos.NewCurrencyClient(conn)
+
+	productsHandler := handlers.NewProductsHandler(lproducts, vproducts, cc)
+
 	r := mux.NewRouter()
 	// r.HandleFunc("/api/v1/product", productsHandler.GetAllProduct).Methods(http.MethodGet)
 	// r.HandleFunc("/api/v1/product", productsHandler.AddProduct).Methods(http.MethodPost).Subrouter()
@@ -29,7 +42,7 @@ func main() {
 
 	getRouter := r.Methods(http.MethodGet).Subrouter()
 	getRouter.HandleFunc("/api/v1/product", productsHandler.GetAllProduct)
-	getRouter.HandleFunc("/api/v1/product/{id:[0-9]+}", productsHandler.GetAllProduct)
+	getRouter.HandleFunc("/api/v1/product/{id:[0-9]+}", productsHandler.GetProduct)
 
 	postRouter := r.Methods(http.MethodPost).Subrouter()
 	postRouter.HandleFunc("/api/v1/product", productsHandler.AddProduct)

@@ -1,10 +1,13 @@
 package handlers
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"productapi/data"
 	"strconv"
+
+	protos "currentcyproject/protos/currency"
 
 	"github.com/gorilla/mux"
 )
@@ -12,8 +15,9 @@ import (
 type KeyProduct struct{}
 
 type Products struct {
-	l *log.Logger
-	v *data.Validation
+	l  *log.Logger
+	v  *data.Validation
+	cc protos.CurrencyClient
 }
 
 // GenericError is a generic error message returned by a server
@@ -26,8 +30,8 @@ type ValidationError struct {
 	Messages []string `json:"messages"`
 }
 
-func NewProductsHandler(l *log.Logger, v *data.Validation) *Products {
-	return &Products{l, v}
+func NewProductsHandler(l *log.Logger, v *data.Validation, cc protos.CurrencyClient) *Products {
+	return &Products{l, v, cc}
 }
 
 // swagger:route GET /api/v1/product products GetAllProduct
@@ -66,6 +70,20 @@ func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 	}
+
+	rr := &protos.RateRequest{
+		Base:        protos.Currencies(protos.Currencies_value["EUR"]),
+		Destination: protos.Currencies(protos.Currencies_value["GBP"]),
+	}
+	resp, err := p.cc.GetRate(context.Background(), rr)
+	if err != nil {
+		p.l.Println("[Error] error getting new rate", err)
+		data.ToJSON(&GenericError{Message: err.Error()}, rw)
+		return
+	}
+	p.l.Printf("Resp %#v", resp)
+	product.Price = product.Price * resp.Rate
+
 	err = data.ToJSON(product, rw)
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusBadRequest)
