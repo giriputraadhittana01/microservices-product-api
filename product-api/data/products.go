@@ -102,7 +102,7 @@ func (p *ProductsDB) GetProducts(currency string) (Products, error) {
 
 func (p *ProductsDB) GetProduct(id int, currency string) (*Product, error) {
 	// Item, Index, Error
-	item, idx, _ := findProduct(id)
+	_, idx, _ := findProduct(id)
 	if idx == -1 {
 		return nil, ErrProductNotFound
 	}
@@ -114,7 +114,7 @@ func (p *ProductsDB) GetProduct(id int, currency string) (*Product, error) {
 
 	np := *productList[idx]
 	np.Price = np.Price * rate
-	return item, nil
+	return &np, nil
 }
 
 func (p *ProductsDB) AddProduct(pr *Product) {
