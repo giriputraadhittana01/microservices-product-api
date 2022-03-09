@@ -16,8 +16,13 @@
 package data
 
 import (
+	"context"
 	"fmt"
 	"time"
+
+	protos "currentcyproject/protos/currency"
+
+	"github.com/hashicorp/go-hclog"
 )
 
 // Product defines the structure for an API product
@@ -42,7 +47,7 @@ type Product struct {
 	//
 	// required: true
 	// min: 0.01
-	Price float32 `json:"price" validate:"gt=0"`
+	Price float64 `json:"price" validate:"gt=0"`
 	// the SKU for the product
 	//
 	// required: true
@@ -56,38 +61,79 @@ type Product struct {
 // Products is a collection of Product
 type Products []*Product
 
-// GetProducts returns a list of products
-func GetProducts() Products {
-	return productList
+type ProductsDB struct {
+	currency protos.CurrencyClient
+	log      hclog.Logger
 }
 
-func GetProduct(id int) (*Product, error) {
+func NewProductsDB(c protos.CurrencyClient, l hclog.Logger) *ProductsDB {
+	return &ProductsDB{c, l}
+}
+func (p *ProductsDB) getRate(destination string) (float64, error) {
+	rr := &protos.RateRequest{
+		Base:        protos.Currencies(protos.Currencies_value["EUR"]),
+		Destination: protos.Currencies(protos.Currencies_value[destination]),
+	}
+	resp, err := p.currency.GetRate(context.Background(), rr)
+	return resp.Rate, err
+}
+
+// GetProducts returns a list of products
+func (p *ProductsDB) GetProducts(currency string) (Products, error) {
+	if currency == "" {
+		return productList, nil
+	}
+
+	rate, err := p.getRate(currency)
+	if err != nil {
+		p.log.Error("Unable to get rate", "currency", currency, "error", err)
+		return nil, err
+	}
+
+	pr := Products{}
+	for _, p := range productList {
+		np := *p
+		np.Price = np.Price * rate
+		pr = append(pr, &np)
+	}
+
+	return pr, nil
+}
+
+func (p *ProductsDB) GetProduct(id int, currency string) (*Product, error) {
 	// Item, Index, Error
 	item, idx, _ := findProduct(id)
 	if idx == -1 {
 		return nil, ErrProductNotFound
 	}
+	rate, err := p.getRate(currency)
+	if err != nil {
+		p.log.Error("Unable to get rate", "currency", currency, "error", err)
+		return nil, err
+	}
 
+	np := *productList[idx]
+	np.Price = np.Price * rate
 	return item, nil
 }
 
-func AddProduct(p *Product) {
-	p.ID = getNextID()
-	productList = append(productList, p)
+func (p *ProductsDB) AddProduct(pr *Product) {
+	pr.ID = getNextID()
+	productList = append(productList, pr)
 }
 
 func getNextID() int {
 	lp := productList[len(productList)-1]
 	return lp.ID + 1
 }
-func UpdateProduct(id int, p *Product) error {
+func (p *ProductsDB) UpdateProduct(id int, pr *Product) error {
 	_, pos, err := findProduct(id)
 	if err != nil {
 		return err
 	}
 
-	p.ID = id
-	productList[pos] = p
+	pr.ID = id
+	productList[pos] = pr
 
 	return nil
 }
